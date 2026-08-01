@@ -22,9 +22,9 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  title: "Baby Shower de Gerardo",
+  title: "Baby Shower de Gonzalo",
   description:
-    "Nos encantaría que nos acompañes en el Baby Shower de Gerardo — 29 de agosto de 2026, 3:00 PM.",
+    "Nos encantaría que nos acompañes en el Baby Shower de Gonzalo — 29 de agosto de 2026, 3:00 PM.",
 };
 
 export default function RootLayout({
