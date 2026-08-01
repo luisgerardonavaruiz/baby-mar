@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  /* Palette — pulled from the balloon bear: dusty blues, warm caramel, cream */
+  --blue-deep: #3E6B93;
+  --blue: #6FA0C4;
+  --blue-soft: #AACBE0;
+  --blue-pale: #E8F2F8;
+  --caramel: #D9A462;
+  --caramel-light: #F0DCB8;
+  --cream: #FBF6EC;
+  --ink: #3A332B;
+  --white: #FFFFFF;
+}
+
+@theme inline {
+  --color-blue-deep: var(--blue-deep);
+  --color-blue: var(--blue);
+  --color-blue-soft: var(--blue-soft);
+  --color-blue-pale: var(--blue-pale);
+  --color-caramel: var(--caramel);
+  --color-caramel-light: var(--caramel-light);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --font-display: var(--font-display);
+  --font-script: var(--font-script);
+  --font-body: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: var(--blue-soft);
+  color: var(--ink);
+}
+
+.font-display {
+  font-family: var(--font-display), serif;
+}
+
+.font-script {
+  font-family: var(--font-script), cursive;
+}
+
+/* Signature: gentle float for the hero balloon bear, like it's drifting */
+@keyframes drift {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50% { transform: translateY(-18px) rotate(0.6deg); }
+}
+.animate-drift {
+  animation: drift 6s ease-in-out infinite;
+}
+
+/* Background balloon dots, floating slowly upward and looping */
+@keyframes float-up {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: var(--dot-opacity, 0.5); }
+  90% { opacity: var(--dot-opacity, 0.5); }
+  100% { transform: translateY(-60px) translateX(6px); opacity: 0; }
+}
+.animate-float-up {
+  animation: float-up var(--dur, 8s) ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-drift, .animate-float-up {
+    animation: none !important;
+  }
+}
+
+/* Visible keyboard focus */
+a:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 3px solid var(--blue-deep);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
