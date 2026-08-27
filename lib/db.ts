@@ -21,11 +21,17 @@ export function sql() {
 
 /**
  * Crea la tabla "invitados" si no existe todavía, y si detecta la tabla
- * "rsvps" de la versión anterior de la app (formulario libre, sin lista
- * de invitados), migra esas confirmaciones para no perder datos.
+ * "rsvps" de la versión anterior, intenta migrar esas confirmaciones para
+ * no perder datos. Es tolerante a que "rsvps" tenga columnas distintas a
+ * las esperadas (por ejemplo, si le falta "telefono", "personas" o
+ * "creado_en") — migra lo que sí exista y deja lo demás en NULL / la
+ * fecha actual.
+ *
  * Segura para llamar en cada request: sólo hace trabajo real una vez por
- * instancia tibia del servidor (schemaEnsured) y sólo migra una vez
- * (mientras "invitados" esté vacía).
+ * instancia tibia del servidor (schemaEnsured), sólo migra una vez
+ * (mientras "invitados" esté vacía), y si la migración falla por
+ * cualquier motivo, no rompe el resto de la app — sólo se salta y queda
+ * registrado en los logs. Los datos viejos siguen intactos en "rsvps".
  */
 export async function ensureSchema() {
   if (schemaEnsured) return;
@@ -44,23 +50,46 @@ export async function ensureSchema() {
     )
   `;
 
-  const yaHayInvitados = await db`SELECT EXISTS (SELECT 1 FROM invitados) AS existe`;
-  if (!yaHayInvitados[0]?.existe) {
-    const rsvpsExiste = await db`
-      SELECT EXISTS (
-        SELECT 1 FROM information_schema.tables WHERE table_name = 'rsvps'
-      ) AS existe
-    `;
-    if (rsvpsExiste[0]?.existe) {
-      // Trae quienes ya habían confirmado con el formulario libre de la
-      // versión anterior y los agrega como "confirmado" en la nueva lista.
-      await db`
-        INSERT INTO invitados (nombre, estado, personas, telefono, creado_en, actualizado_en)
-        SELECT nombre, 'confirmado', personas, telefono, creado_en, creado_en
-        FROM rsvps
-      `;
+  try {
+    const yaHayInvitados = await db`SELECT EXISTS (SELECT 1 FROM invitados) AS existe`;
+    if (!yaHayInvitados[0]?.existe) {
+      await migrarDesdeRsvpsSiExiste(db);
     }
+  } catch (err) {
+    console.error("No se pudo migrar datos de 'rsvps' a 'invitados':", err);
   }
 
   schemaEnsured = true;
+}
+
+async function migrarDesdeRsvpsSiExiste(db: NeonQueryFunction<false, false>) {
+  const rsvpsExiste = await db`
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.tables WHERE table_name = 'rsvps'
+    ) AS existe
+  `;
+  if (!rsvpsExiste[0]?.existe) return;
+
+  const columnas = await db`
+    SELECT column_name FROM information_schema.columns WHERE table_name = 'rsvps'
+  `;
+  const disponibles = new Set(columnas.map((c) => c.column_name as string));
+
+  if (!disponibles.has("nombre")) {
+    console.warn("La tabla 'rsvps' no tiene columna 'nombre'; no se migró nada.");
+    return;
+  }
+
+  // Sólo referenciamos nombres de columna de esta lista fija (nunca datos
+  // del usuario), así que es seguro armar el SQL como texto.
+  const personasExpr = disponibles.has("personas") ? "personas" : "NULL";
+  const telefonoExpr = disponibles.has("telefono") ? "telefono" : "NULL";
+  const creadoExpr = disponibles.has("creado_en") ? "creado_en" : "now()";
+
+  const query = `
+    INSERT INTO invitados (nombre, estado, personas, telefono, creado_en, actualizado_en)
+    SELECT nombre, 'confirmado', ${personasExpr}, ${telefonoExpr}, ${creadoExpr}, ${creadoExpr}
+    FROM rsvps
+  `;
+  await db.query(query);
 }
