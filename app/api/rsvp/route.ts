@@ -11,11 +11,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Solicitud inválida." }, { status: 400 });
   }
 
-  const { invitado_id, estado, personas, telefono } = (body ?? {}) as {
+  const { invitado_id, estado, personas, } = (body ?? {}) as {
     invitado_id?: number | string;
     estado?: string;
     personas?: number | string;
-    telefono?: string;
   };
 
   const id = Number(invitado_id);
@@ -29,14 +28,6 @@ export async function POST(req: NextRequest) {
   if (!estado || !ESTADOS_VALIDOS.includes(estado as (typeof ESTADOS_VALIDOS)[number])) {
     return NextResponse.json(
       { error: "Indica si asistirás o no." },
-      { status: 400 }
-    );
-  }
-
-  const telefonoLimpio = String(telefono ?? "").trim();
-  if (!telefonoLimpio || telefonoLimpio.length < 7 || telefonoLimpio.length > 20) {
-    return NextResponse.json(
-      { error: "Escribe un teléfono válido." },
       { status: 400 }
     );
   }
@@ -68,7 +59,6 @@ export async function POST(req: NextRequest) {
       UPDATE invitados
       SET estado = ${estado},
           personas = ${personasNum},
-          telefono = ${telefonoLimpio},
           actualizado_en = now()
       WHERE id = ${id}
     `;

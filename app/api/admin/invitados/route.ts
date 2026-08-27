@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     await ensureSchema();
     const db = sql();
     const rows = await db`
-      SELECT id, nombre, estado, personas, telefono, creado_en, actualizado_en
+      SELECT id, nombre, estado, personas, creado_en, actualizado_en
       FROM invitados
       ORDER BY nombre ASC
     `;
