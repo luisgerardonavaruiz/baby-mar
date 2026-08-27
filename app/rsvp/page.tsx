@@ -27,7 +27,6 @@ export default function RsvpPage() {
 
   const [estado, setEstado] = useState<"confirmado" | "no_asiste">("confirmado");
   const [personas, setPersonas] = useState("1");
-  const [telefono, setTelefono] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [nombreConfirmado, setNombreConfirmado] = useState("");
@@ -76,7 +75,6 @@ export default function RsvpPage() {
           invitado_id: seleccionado.id,
           estado,
           personas: estado === "confirmado" ? Number(personas) : undefined,
-          telefono,
         }),
       });
       const data = await res.json();
@@ -293,23 +291,6 @@ export default function RsvpPage() {
                 />
               </div>
             )}
-
-            <div>
-              <label htmlFor="telefono" className="block text-sm font-semibold text-ink/80">
-                Teléfono
-              </label>
-              <input
-                id="telefono"
-                type="tel"
-                required
-                minLength={7}
-                maxLength={20}
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                placeholder="Ej. 771 123 4567"
-                className="mt-1.5 w-full rounded-xl border border-blue-soft/50 px-4 py-2.5 outline-none focus:border-blue-deep"
-              />
-            </div>
 
             {status === "error" && (
               <p role="alert" className="text-sm text-red-600">
