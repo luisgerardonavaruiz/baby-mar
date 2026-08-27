@@ -108,7 +108,7 @@ export default function RsvpPage() {
           {asiste ? (
             <>
               Quedó anotada la asistencia de <strong>{nombreConfirmado}</strong> al
-              Baby Shower de Gerardo. Nos vemos el 29 de agosto a las 3:00 PM. 🩵
+              Baby Shower de Gonzalo. Nos vemos el 29 de agosto a las 3:00 PM. 🩵
             </>
           ) : (
             <>

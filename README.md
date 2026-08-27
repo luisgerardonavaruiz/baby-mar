@@ -1,6 +1,6 @@
-# Baby Shower de Gerardo 🩵
+# Baby Shower de Gonzalo 🩵
 
-Invitación web para el Baby Shower de Gerardo — Next.js + Neon (Postgres),
+Invitación web para el Baby Shower de Gonzalo — Next.js + Neon (Postgres),
 lista para desplegar en Vercel.
 
 ## ¿Qué incluye?
