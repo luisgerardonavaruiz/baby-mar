@@ -8,10 +8,16 @@ lista para desplegar en Vercel.
 - **`/`** — Página principal con la imagen, fecha (29 de agosto de 2026,
   3:00 PM), lugar (Quinta Alejandra, Pachuca de Soto), cuenta regresiva y
   botones para ver la ubicación y confirmar asistencia.
-- **`/rsvp`** — Formulario de confirmación (nombre, número de personas,
-  teléfono) que guarda cada respuesta en la base de datos.
-- **`/admin`** — Página protegida con contraseña donde solo tú (mamá) puedes
-  ver la lista de quiénes confirmaron.
+- **`/rsvp`** — El invitado busca y selecciona su nombre de la lista (no
+  necesita crear cuenta ni escribir su nombre), y responde "Sí, ahí estaré"
+  o "No podré asistir", con número de personas y teléfono. Puede volver a
+  entrar después y cambiar su respuesta si algo cambia.
+- **`/admin`** — Página protegida con contraseña donde solo tú (mamá) puedes:
+  - Agregar los nombres de tus invitados (uno por línea) para que aparezcan
+    en la lista de `/rsvp`.
+  - Ver quién confirmó, quién no podrá asistir y quién sigue pendiente,
+    con sus teléfonos y el total de personas confirmadas.
+  - Eliminar a alguien de la lista si hace falta.
 
 ## 1. Crear la base de datos en Neon
 
@@ -65,15 +71,35 @@ npm run dev
 
 Abre http://localhost:3000
 
+## Actualización desde la versión anterior (importante)
+
+Este repositorio ya estaba desplegado con el formulario libre (sin lista de
+invitados) y tiene confirmaciones reales guardadas en la tabla `rsvps`. Al
+desplegar esta nueva versión **no necesitas hacer nada manual**: la primera
+vez que alguien visite el sitio (o entres a `/admin`), la app:
+
+1. Crea la nueva tabla `invitados`.
+2. Detecta que existe la tabla vieja `rsvps` y, si `invitados` está vacía,
+   copia automáticamente esas confirmaciones como invitados con estado
+   "confirmado" — no se pierde nada.
+
+La tabla `rsvps` no se borra (por si quieres revisarla o respaldarla), sólo
+deja de usarse. Después de desplegar, entra a `/admin` para confirmar que
+tus invitados anteriores aparecen, y agrega ahí al resto de la lista antes
+de compartir el link de `/rsvp`.
+
 ## Notas
 
+- **Antes de compartir el link**, entra a `/admin` con tu contraseña y agrega
+  los nombres de tus invitados (además de los que ya se migraron
+  automáticamente). Así, cuando alguien entre a `/rsvp`, podrá buscar y
+  seleccionar su nombre de la lista.
 - La ubicación usa directamente el enlace de Google Maps que
   compartiste (Quinta Alejandra, Pachuca de Soto, Hgo.).
 - La imagen del osito en globo (`public/oso.png`) ya tiene el fondo blanco
   removido para que se vea flotando de forma natural.
-- El botón "Confirmar asistencia" no tiene límite de veces que alguien
-  puede usarlo — si una familia manda dos confirmaciones por error, ambas
-  quedarán guardadas; puedes borrarlas manualmente desde el SQL Editor de
-  Neon si hace falta.
+- Cada invitado puede volver a entrar a `/rsvp`, buscar su nombre otra vez y
+  cambiar su respuesta (por ejemplo, si primero dijo que sí y luego ya no
+  puede ir). La respuesta más reciente siempre sustituye a la anterior.
 - Puedes cambiar el texto, colores o la fecha directamente en
   `app/page.tsx` y `components/Countdown.tsx`.
